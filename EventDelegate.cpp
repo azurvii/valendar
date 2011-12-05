@@ -7,6 +7,7 @@
 
 #include "EventDelegate.h"
 #include <QApplication>
+#include <iostream>
 
 EventDelegate::EventDelegate(QObject *parent) :
 		QStyledItemDelegate(parent) {
@@ -53,27 +54,14 @@ QString EventDelegate::getOffsetString(int secs) {
 		resultString = "+ ";
 	}
 	int days = secs / 24 / 3600;
-	int hours = secs % (24 * 3600) / 3600;
-	int mins = secs % (3600) / 60;
+	int hours = (secs % (24 * 3600)) / 3600;
+	int mins = (secs % (3600)) / 60;
 	secs = secs % 60;
 	if (days > 0) {
-		resultString += QString("%1 %2 ").arg(days).arg(
+		resultString += QString("%1d ").arg(days).arg(
 				days == 1 ? "day" : "days");
 	}
-	if (hours > 0) {
-		resultString += QString("%1 %2 ").arg(hours).arg(
-				hours == 1 ? "hour" : "hours");
-	}
-	if (mins > 0) {
-		resultString += QString("%1 %2").arg(mins).arg(
-				mins == 1 ? "min" : "mins");
-	}
-	if (mins > 0) {
-		resultString += QString("%1 %2").arg(secs).arg(
-				secs == 1 ? "sec" : "secs");
-	}
-	if (resultString.isEmpty()) {
-		resultString = "0 sec";
-	}
+	resultString += QString("%1:%2:%3").arg(hours, 2, 10, QChar('0')).arg(mins,
+			2, 10, QChar('0')).arg(secs, 2, 10, QChar('0'));
 	return resultString;
 }

@@ -76,8 +76,8 @@ void GalendarForm::init() {
 	ui.debugModeCheck->setChecked(debugMode);
 //	ui.afterAuthWidget->setEnabled(false);
 //	ui.afterCalListWidget->setEnabled(false);
-	ui.eventTable->setItemDelegate(new EventDelegate(this));
-	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
+//	ui.eventTable->setItemDelegate(new EventDelegate(this));
+//	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
 	ui.publishDateTimeEdit->setDate(QDate::currentDate());
 	setDebugWidgetsVisible(debugMode);
 	prepareDB();
@@ -620,7 +620,7 @@ void GalendarForm::selectEvents() {
 	ui.eventTable->setModel(eventModel);
 	ui.eventTable->hideColumn(0);
 	ui.eventTable->hideColumn(5);
-//	ui.eventTable->setItemDelegate(new EventDelegate(this));
+	ui.eventTable->setItemDelegate(new EventDelegate(this));
 	connect(
 			ui.eventTable->selectionModel(),
 			SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -637,7 +637,7 @@ void GalendarForm::selectProjects() {
 //			QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
 	projectModel->select();
 	ui.projectTable->hideColumn(0);
-//	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
+	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
 }
 
 void GalendarForm::on_eventDeleteButton_clicked() {
