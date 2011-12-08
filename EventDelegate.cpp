@@ -8,7 +8,9 @@
 #include "EventDelegate.h"
 #include <QApplication>
 #include <iostream>
-#include <QtGui>
+//#include <QtGui>
+#include <QPainter>
+#include "EventTimeEditWidget.h"
 
 EventDelegate::EventDelegate(QObject *parent) :
 		QStyledItemDelegate(parent) {
@@ -17,18 +19,24 @@ EventDelegate::EventDelegate(QObject *parent) :
 QWidget *EventDelegate::createEditor(QWidget *parent,
 		const QStyleOptionViewItem &option, const QModelIndex &index) const {
 	int col = index.column();
-	QSpinBox *spinBox;
+	EventTimeEditWidget *editor;
 	switch (col) {
 	case 3:
 	case 4:
 //		int offset = index.data().toInt();
-		spinBox = new QSpinBox(parent);
-		spinBox->setRange(col == 4 ? 0 : -999999999, 999999999);
-		spinBox->setSuffix("s");
+		if (col == 3) {
+			editor = new EventTimeEditWidget(true, parent);
+		} else {
+			editor = new EventTimeEditWidget(false, parent);
+		}
+//		editor->setGeometry(option.rect.x(), option.rect.y(),
+//				option.rect.width(), editor->height());
+//		spinBox->setRange(col == 4 ? 0 : -999999999, 999999999);
+//		spinBox->setSuffix("s");
 //		QApplication::style()->drawItemText(painter, option.rect,
 //				Qt::AlignLeft | Qt::AlignVCenter, QApplication::palette(), true,
 //				getOffsetString(offset));
-		return spinBox;
+		return editor;
 	default:
 		return QStyledItemDelegate::createEditor(parent, option, index);
 	}
@@ -36,17 +44,45 @@ QWidget *EventDelegate::createEditor(QWidget *parent,
 
 void EventDelegate::setEditorData(QWidget *editor,
 		const QModelIndex &index) const {
-	QStyledItemDelegate::setEditorData(editor, index);
+	int col = index.column();
+	switch (col) {
+	case 3:
+	case 4:
+		((EventTimeEditWidget*) editor)->setTime(index.data().toInt());
+		break;
+	default:
+		QStyledItemDelegate::setEditorData(editor, index);
+		break;
+	}
 }
 
 void EventDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 		const QModelIndex &index) const {
-	QStyledItemDelegate::setModelData(editor, model, index);
+	int col = index.column();
+	switch (col) {
+	case 3:
+	case 4:
+		model->setData(index, ((EventTimeEditWidget*) editor)->getTime());
+		break;
+	default:
+		QStyledItemDelegate::setModelData(editor, model, index);
+		break;
+	}
 }
 
 void EventDelegate::updateEditorGeometry(QWidget *editor,
 		const QStyleOptionViewItem &option, const QModelIndex &index) const {
-	QStyledItemDelegate::updateEditorGeometry(editor, option, index);
+	int col = index.column();
+	switch (col) {
+	case 3:
+	case 4:
+		editor->setGeometry(option.rect.x(), option.rect.y(),
+				option.rect.width(), editor->height());
+		break;
+	default:
+		QStyledItemDelegate::updateEditorGeometry(editor, option, index);
+		break;
+	}
 }
 
 void EventDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -56,9 +92,10 @@ void EventDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 	case 3:
 	case 4:
 //		int offset = index.data().toInt();
+		painter->setFont(QFont("Monospace"));
 		QApplication::style()->drawItemText(painter, option.rect,
-				Qt::AlignLeft | Qt::AlignVCenter, QApplication::palette(), true,
-				getOffsetString(index.data().toInt()));
+				Qt::AlignRight | Qt::AlignVCenter, QApplication::palette(),
+				true, getOffsetString(index.data().toInt()));
 		break;
 	default:
 		QStyledItemDelegate::paint(painter, option, index);
@@ -66,22 +103,27 @@ void EventDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 	}
 }
 
-QString EventDelegate::getOffsetString(int secs) {
+QString EventDelegate::getOffsetString(int time) {
 	QString resultString;
-	if (secs < 0) {
-		secs = -secs;
+	if (time < 0) {
+		time = -time;
 		resultString = "-";
 	} else {
 		resultString = "+";
 	}
-	int days = secs / 24 / 3600;
-	int hours = (secs % (24 * 3600)) / 3600;
-	int mins = (secs % (3600)) / 60;
-	secs = secs % 60;
+	int days = time / 24 / 3600;
+	int hours = (time % (24 * 3600)) / 3600;
+	int mins = (time % (3600)) / 60;
+	int secs = time % 60;
+	bool needSpace = false;
 	if (days > 0) {
-		resultString += QString("%1d ").arg(days);
+		resultString += QString("%1d").arg(days);
+		needSpace = true;
 	}
-	resultString += QString("%1:%2:%3").arg(hours, 2, 10, QChar('0')).arg(mins,
-			2, 10, QChar('0')).arg(secs, 2, 10, QChar('0'));
+	if (time % (24 * 3600) != 0) {
+		resultString += QString(needSpace ? " %1:%2:%3" : "%1:%2:%3").arg(hours,
+				2, 10, QChar('0')).arg(mins, 2, 10, QChar('0')).arg(secs, 2, 10,
+				QChar('0'));
+	}
 	return resultString;
 }
