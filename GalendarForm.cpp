@@ -72,8 +72,11 @@ void GalendarForm::init() {
 	ui.scopeEdit->setText(oaScope);
 	ui.progressBar->hide();
 	ui.logBrowser->setFont(QFont("Monospace"));
-	debugMode = true;
+	debugMode = false;
 	ui.debugModeCheck->setChecked(debugMode);
+	if (!debugMode) {
+		ui.debugModeCheck->setVisible(false);
+	}
 //	ui.afterAuthWidget->setEnabled(false);
 //	ui.afterCalListWidget->setEnabled(false);
 //	ui.eventTable->setItemDelegate(new EventDelegate(this));
@@ -230,9 +233,9 @@ void GalendarForm::on_testGoButton_clicked() {
 			ui.testPostEdit->text().toUtf8());
 }
 
-void GalendarForm::on_testWebView_urlChanged(const QUrl &url) {
-//	ui.testUrlEdit->setText(url.toString());
-}
+//void GalendarForm::on_testWebView_urlChanged(const QUrl &url) {
+////	ui.testUrlEdit->setText(url.toString());
+//}
 
 void GalendarForm::setDebugWidgetsVisible(bool visible) {
 	ui.debugWidget->setVisible(visible);
@@ -243,10 +246,12 @@ void GalendarForm::setDebugWidgetsVisible(bool visible) {
 		ui.tabWidget->addTab(ui.logTab, tr("Log"));
 		ui.tabWidget->addTab(ui.testTab, tr("Test"));
 		ui.tabWidget->addTab(ui.scriptTab, tr("Script"));
+		ui.tabWidget->addTab(ui.pubTab, tr("Publication"));
 	} else {
 		ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.logTab));
 		ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.testTab));
 		ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.scriptTab));
+		ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.pubTab));
 	}
 }
 
@@ -289,7 +294,11 @@ void GalendarForm::getAllCalendars() {
 
 void GalendarForm::readApiReaderReply(QNetworkReply *reply) {
 	QByteArray bytes = reply->readAll();
-	ui.webView->setContent(bytes, "text/plain");
+	if (debugMode) {
+		ui.webView->setContent(bytes, "text/plain");
+//	} else {
+//		ui.webView->setContent(bytes, "text/plain");
+	}
 
 //	} else{
 //		scriptValue.toString();
@@ -327,6 +336,12 @@ void GalendarForm::readApiReaderReply(QNetworkReply *reply) {
 			}
 		}
 //		ui.afterCalListWidget->setEnabled(true);
+		if (!debugMode) {
+			ui.webView->setContent(
+					tr("Please select a calendar from the combo box "
+							"in which you would like to publish the project.").toUtf8(),
+					"text/plain");
+		}
 	} else if (requestUrl.contains("/calendars/")
 			&& requestUrl.contains("/events")) { // Event list request
 		events = scriptEngine.evaluate("(" + QString(bytes) + ")");
@@ -347,13 +362,24 @@ void GalendarForm::readApiReaderReply(QNetworkReply *reply) {
 
 void GalendarForm::readApiWriterReply(QNetworkReply *reply) {
 	QByteArray bytes = reply->readAll();
-	ui.webView->setContent(bytes, "text/plain");
+	if (debugMode) {
+		ui.webView->setContent(bytes, "text/plain");
+	}
 	QScriptValue result = scriptEngine.evaluate("(" + QString(bytes) + ")");
 	QString id = result.property("id").toString();
 	if (id.isEmpty()) {
 		log(tr("[ERROR] Event creation failed"));
+		if (!debugMode) {
+			ui.webView->setContent(tr("ERROR! Event creation failed. "
+					"Please check network connection first.").toUtf8(),
+					"text/plain");
+		}
 	} else {
 		log(tr("[INFO] Event created with id %1").arg(id));
+		if (!debugMode) {
+			ui.webView->setContent(tr("Project published.").toUtf8(),
+					"text/plain");
+		}
 	}
 }
 

@@ -40,7 +40,7 @@ public slots:
 	void readApiReaderReply(QNetworkReply *reply);
 	void readApiWriterReply(QNetworkReply *reply);
 	void requestAccessToken();
-	void on_testWebView_urlChanged(const QUrl &url);
+//	void on_testWebView_urlChanged(const QUrl &url);
 	void on_clientIdEdit_textChanged(const QString &clientId);
 	void on_clientSecretEdit_textChanged(const QString &clientSecret);
 	void on_scopeEdit_textChanged(const QString &scope);
