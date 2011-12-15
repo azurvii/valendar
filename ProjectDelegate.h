@@ -8,10 +8,10 @@
 #ifndef PROJECTDELEGATE_H_
 #define PROJECTDELEGATE_H_
 
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 
-class ProjectDelegate: public QItemDelegate {
-	Q_OBJECT
+class ProjectDelegate: public QStyledItemDelegate {
+Q_OBJECT
 public:
 	ProjectDelegate(QObject *parent = 0);
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
@@ -21,6 +21,8 @@ public:
 			const QModelIndex &index) const;
 	void updateEditorGeometry(QWidget *editor,
 			const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void paint(QPainter *painter, const QStyleOptionViewItem &option,
+			const QModelIndex &index) const;
 };
 
 #endif /* PROJECTDELEGATE_H_ */

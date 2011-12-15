@@ -74,9 +74,9 @@ void GalendarForm::init() {
 	ui.logBrowser->setFont(QFont("Monospace"));
 	debugMode = false;
 	ui.debugModeCheck->setChecked(debugMode);
-	if (!debugMode) {
-		ui.debugModeCheck->setVisible(false);
-	}
+//	if (!debugMode) {
+//		ui.debugModeCheck->setVisible(false);
+//	}
 //	ui.afterAuthWidget->setEnabled(false);
 //	ui.afterCalListWidget->setEnabled(false);
 //	ui.eventTable->setItemDelegate(new EventDelegate(this));
@@ -128,7 +128,8 @@ void GalendarForm::on_webView_loadFinished(bool ok) {
 			authToken = ui.webView->title().split("=")[1];
 //			log(url.toString());
 			log("[AUTH TOKEN] " + authToken);
-			ui.webView->load(QNetworkRequest(QUrl("about:blank")));
+//			ui.webView->load(QNetworkRequest(QUrl("about:blank")));
+			ui.webView->setContent(tr("Please wait...").toUtf8(), "text/plain");
 			requestAccessToken();
 //			ui.webView->setHtml();
 		}
@@ -339,7 +340,7 @@ void GalendarForm::readApiReaderReply(QNetworkReply *reply) {
 		if (!debugMode) {
 			ui.webView->setContent(
 					tr("Please select a calendar from the combo box "
-							"in which you would like to publish the project.").toUtf8(),
+							"and a date to publish your project.").toUtf8(),
 					"text/plain");
 		}
 	} else if (requestUrl.contains("/calendars/")
@@ -509,8 +510,8 @@ bool GalendarForm::prepareDB() {
 	if (!query.exec("CREATE TABLE IF NOT EXISTS Project ("
 			"id INTEGER PRIMARY KEY AUTOINCREMENT, "
 			"name TEXT, "
-			"creation TEXT, "
-			"note TEXT)")) {
+			"note TEXT, "
+			"creation INTEGER)")) {
 		QMessageBox::critical(0, qApp->tr("Creating Project table failed"),
 				qApp->tr("Click Cancel to exit."), QMessageBox::Cancel);
 		return false;
@@ -530,7 +531,7 @@ bool GalendarForm::prepareDB() {
 	if (!query.exec("CREATE TABLE IF NOT EXISTS Publication ("
 			"id INTEGER PRIMARY KEY AUTOINCREMENT, "
 			"pubId TEXT, "
-			"gEventId TEXT)")) {
+			"pubTime INTEGER)")) {
 		QMessageBox::critical(0, qApp->tr("Creating Publication table failed"),
 				qApp->tr("Click Cancel to exit."), QMessageBox::Cancel);
 		return false;
@@ -553,16 +554,16 @@ bool GalendarForm::prepareDB() {
 				qApp->tr("Click Cancel to exit."), QMessageBox::Cancel);
 		return false;
 	}
-//	projectModel->removeColumn(0); // don't show the ID
-	projectModel->setHeaderData(0, Qt::Horizontal, tr("ID"));
+//	projectModel->removeColumn(0); // DO NOT use this method! It fails model-view auto-sync.
+//	projectModel->setHeaderData(0, Qt::Horizontal, tr("ID"));
 	projectModel->setHeaderData(1, Qt::Horizontal, tr("Name"));
-	projectModel->setHeaderData(2, Qt::Horizontal, tr("Created"));
-	projectModel->setHeaderData(3, Qt::Horizontal, tr("Note"));
+	projectModel->setHeaderData(2, Qt::Horizontal, tr("Note"));
+	projectModel->setHeaderData(3, Qt::Horizontal, tr("Created"));
 
 //	eventModel->setTable("event");
 	ui.projectTable->setModel(projectModel);
 	ui.projectTable->hideColumn(0);
-//	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
+	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
 	connect(
 			ui.projectTable->selectionModel(),
 			SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -575,8 +576,7 @@ void GalendarForm::on_projectAddButton_clicked() {
 	query.prepare("INSERT INTO project (name, creation, note) "
 			"VALUES (:name, :creation, :note)");
 	query.bindValue(":name", "Project");
-	query.bindValue(":creation",
-			QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+	query.bindValue(":creation", QDateTime::currentDateTime().toTime_t());
 	query.bindValue(":note", "Project note");
 	query.exec();
 	selectProjects();
@@ -629,22 +629,23 @@ void GalendarForm::on_eventAddButton_clicked() {
 void GalendarForm::selectEvents() {
 	QSqlTableModel * eventModel = new QSqlTableModel;
 	eventModel->setTable("event");
+	eventModel->setEditStrategy(QSqlTableModel::OnFieldChange);
 	eventModel->setFilter("projid=" + QString::number(currentProjectId));
 	if (!eventModel->select()) {
 		QMessageBox::critical(0, qApp->tr("Selecting events failed"),
 				qApp->tr("Click Cancel to exit."), QMessageBox::Cancel);
 	}
-//	eventModel->removeColumn(5); // don't show the ID
-//	eventModel->removeColumn(0); // don't show the ID
 //	eventModel->setHeaderData(0, Qt::Horizontal, tr("ID"));
 	eventModel->setHeaderData(1, Qt::Horizontal, tr("Name"));
 	eventModel->setHeaderData(2, Qt::Horizontal, tr("Note"));
 	eventModel->setHeaderData(3, Qt::Horizontal, tr("Start"));
 	eventModel->setHeaderData(4, Qt::Horizontal, tr("Duration"));
+	eventModel->setHeaderData(5, Qt::Horizontal, tr("Attendees"));
 
 //	eventModel->setTable("event");
 	ui.eventTable->setModel(eventModel);
 	ui.eventTable->hideColumn(0);
+	ui.eventTable->hideColumn(6);
 	ui.eventTable->hideColumn(5);
 	ui.eventTable->setItemDelegate(new EventDelegate(this));
 	connect(
@@ -661,9 +662,10 @@ void GalendarForm::selectProjects() {
 //	projectModel->insertRow(projectModel->rowCount());
 //	projectModel->record(projectModel->rowCount() - 1).setValue("creation",
 //			QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+	projectModel->setEditStrategy(QSqlTableModel::OnFieldChange);
 	projectModel->select();
 	ui.projectTable->hideColumn(0);
-	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
+//	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
 }
 
 void GalendarForm::on_eventDeleteButton_clicked() {
@@ -692,8 +694,8 @@ void GalendarForm::loadSettings() {
 	QSettings settings;
 	settings.beginGroup("gui");
 	restoreGeometry(settings.value("geometry", saveGeometry()).toByteArray());
-	ui.tabWidget->setCurrentIndex(
-			settings.value("currentTab", ui.tabWidget->currentIndex()).toInt());
+//	ui.tabWidget->setCurrentIndex(
+//			settings.value("currentTab", ui.tabWidget->currentIndex()).toInt());
 	settings.endGroup();
 }
 
@@ -701,7 +703,7 @@ void GalendarForm::saveSettings() {
 	QSettings settings;
 	settings.beginGroup("gui");
 	settings.setValue("geometry", saveGeometry());
-	settings.setValue("currentTab", ui.tabWidget->currentIndex());
+//	settings.setValue("currentTab", ui.tabWidget->currentIndex());
 	settings.endGroup();
 }
 

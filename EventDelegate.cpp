@@ -24,11 +24,7 @@ QWidget *EventDelegate::createEditor(QWidget *parent,
 	case 3:
 	case 4:
 //		int offset = index.data().toInt();
-		if (col == 3) {
-			editor = new EventTimeEditWidget(true, parent);
-		} else {
-			editor = new EventTimeEditWidget(false, parent);
-		}
+		editor = new EventTimeEditWidget(col == 3 ? true : false, parent);
 //		editor->setGeometry(option.rect.x(), option.rect.y(),
 //				option.rect.width(), editor->height());
 //		spinBox->setRange(col == 4 ? 0 : -999999999, 999999999);
@@ -88,14 +84,20 @@ void EventDelegate::updateEditorGeometry(QWidget *editor,
 void EventDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 		const QModelIndex &index) const {
 	int col = index.column();
+	QString timeString;
+//	index.model()->headerData(col, Qt::Horizontal);
 	switch (col) {
-	case 3:
+	case 3: //
 	case 4:
 //		int offset = index.data().toInt();
 		painter->setFont(QFont("Monospace"));
+		timeString = getOffsetString(index.data().toInt());
+		if (col == 4 && !timeString.startsWith("-")) {
+			timeString = "+" + timeString;
+		}
 		QApplication::style()->drawItemText(painter, option.rect,
 				Qt::AlignRight | Qt::AlignVCenter, QApplication::palette(),
-				true, getOffsetString(index.data().toInt()));
+				true, timeString);
 		break;
 	default:
 		QStyledItemDelegate::paint(painter, option, index);
@@ -108,8 +110,8 @@ QString EventDelegate::getOffsetString(int time) {
 	if (time < 0) {
 		time = -time;
 		resultString = "-";
-	} else {
-		resultString = "+";
+//	} else {
+//		resultString = "+";
 	}
 	int days = time / 24 / 3600;
 	int hours = (time % (24 * 3600)) / 3600;
@@ -120,7 +122,7 @@ QString EventDelegate::getOffsetString(int time) {
 		resultString += QString("%1d").arg(days);
 		needSpace = true;
 	}
-	if (time % (24 * 3600) != 0) {
+	if (time % (24 * 3600) != 0 || needSpace == false) {
 		resultString += QString(needSpace ? " %1:%2:%3" : "%1:%2:%3").arg(hours,
 				2, 10, QChar('0')).arg(mins, 2, 10, QChar('0')).arg(secs, 2, 10,
 				QChar('0'));
