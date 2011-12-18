@@ -19,6 +19,7 @@ EventDelegate::EventDelegate(QObject *parent) :
 QWidget *EventDelegate::createEditor(QWidget *parent,
 		const QStyleOptionViewItem &option, const QModelIndex &index) const {
 	int col = index.column();
+//	index.model()->headerData(col, Qt::Horizontal);
 	EventTimeEditWidget *editor;
 	switch (col) {
 	case 3:

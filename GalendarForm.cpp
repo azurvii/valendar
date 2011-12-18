@@ -57,7 +57,8 @@ void GalendarForm::init() {
 	oaClientId = "1003377928301.apps.googleusercontent.com";
 	oaClientSecret = "_CPiLDKpv117r4JS0TNGJx71";
 	oaScope = "https://www.googleapis.com/auth/userinfo.email "
-			"https://www.googleapis.com/auth/calendar";
+			"https://www.googleapis.com/auth/calendar "
+			"https://www.google.com/m8/feeds";
 	calApiBaseUrl = "https://www.googleapis.com/calendar/v3";
 	currentProjectId = -1;
 	currentEventId = -1;
@@ -243,6 +244,7 @@ void GalendarForm::setDebugWidgetsVisible(bool visible) {
 //	ui.calCheckButton->setVisible(visible);
 //	ui.eventCheckButton->setVisible(visible);
 //	ui.requestAccessTokenButton->setVisible(visible);
+	ui.urlEdit->setVisible(visible);
 	if (visible) {
 		ui.tabWidget->addTab(ui.logTab, tr("Log"));
 		ui.tabWidget->addTab(ui.testTab, tr("Test"));
@@ -511,7 +513,8 @@ bool GalendarForm::prepareDB() {
 			"id INTEGER PRIMARY KEY AUTOINCREMENT, "
 			"name TEXT, "
 			"note TEXT, "
-			"creation INTEGER)")) {
+			"creation INTEGER, "
+			"attendees TEXT)")) {
 		QMessageBox::critical(0, qApp->tr("Creating Project table failed"),
 				qApp->tr("Click Cancel to exit."), QMessageBox::Cancel);
 		return false;
@@ -559,6 +562,7 @@ bool GalendarForm::prepareDB() {
 	projectModel->setHeaderData(1, Qt::Horizontal, tr("Name"));
 	projectModel->setHeaderData(2, Qt::Horizontal, tr("Note"));
 	projectModel->setHeaderData(3, Qt::Horizontal, tr("Created"));
+	projectModel->setHeaderData(4, Qt::Horizontal, tr("Attendees"));
 
 //	eventModel->setTable("event");
 	ui.projectTable->setModel(projectModel);
