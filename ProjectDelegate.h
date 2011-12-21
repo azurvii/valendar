@@ -11,7 +11,7 @@
 #include <QStyledItemDelegate>
 
 class ProjectDelegate: public QStyledItemDelegate {
-Q_OBJECT
+	Q_OBJECT
 public:
 	ProjectDelegate(QObject *parent = 0);
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,

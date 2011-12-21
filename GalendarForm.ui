@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>682</width>
-    <height>682</height>
+    <width>846</width>
+    <height>951</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="projectTab">
       <attribute name="title">
@@ -177,6 +177,9 @@
              </widget>
             </item>
             <item>
+             <widget class="QComboBox" name="calCombo"/>
+            </item>
+            <item>
              <widget class="QPushButton" name="calCheckButton">
               <property name="text">
                <string>Check calendars</string>
@@ -236,16 +239,6 @@
          </item>
          <item>
           <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>&gt;</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="calCombo"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_7">
            <property name="text">
             <string>&gt;</string>
            </property>
