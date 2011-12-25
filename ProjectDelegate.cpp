@@ -15,6 +15,10 @@ ProjectDelegate::ProjectDelegate(QObject *parent) :
 		QStyledItemDelegate(parent) {
 }
 
+void ProjectDelegate::setContacts(const QStringList &contacts) {
+
+}
+
 QWidget *ProjectDelegate::createEditor(QWidget *parent,
 		const QStyleOptionViewItem &option, const QModelIndex &index) const {
 	int col = index.column();

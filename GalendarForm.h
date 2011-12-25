@@ -64,6 +64,7 @@ public slots:
 	void on_publishProjectButton_clicked();
 	void on_clearDatabaseButton_clicked();
 	void on_eventListButton_clicked();
+	void on_contactsListButton_clicked();
 
 protected:
 	virtual void closeEvent(QCloseEvent * event);

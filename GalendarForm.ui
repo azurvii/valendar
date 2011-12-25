@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>7</number>
      </property>
      <widget class="QWidget" name="projectTab">
       <attribute name="title">
@@ -496,6 +496,24 @@
         </layout>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="contactsTab">
+      <attribute name="title">
+       <string>Contacts test</string>
+      </attribute>
+      <widget class="QPushButton" name="contactsListButton">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>97</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Get contacts</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>

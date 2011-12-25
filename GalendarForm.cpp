@@ -110,6 +110,7 @@ void GalendarForm::readReply(QNetworkReply *reply) {
 //	foreach(QByteArray header, reply->request().rawHeaderList()) {
 //		log("[HEADER] " + header + "==>" + reply->request().rawHeader(header));
 //	}
+	reply->deleteLater();
 }
 
 void GalendarForm::log(const QString &message) {
@@ -225,6 +226,7 @@ void GalendarForm::readAccessToken(QNetworkReply *reply) {
 					"text/plain");
 		}
 	}
+	reply->deleteLater();
 }
 
 void GalendarForm::on_testGoButton_clicked() {
@@ -361,6 +363,7 @@ void GalendarForm::readApiReaderReply(QNetworkReply *reply) {
 		}
 //		ui.afterCalListWidget->setEnabled(true);
 	}
+	reply->deleteLater();
 }
 
 void GalendarForm::readApiWriterReply(QNetworkReply *reply) {
@@ -384,6 +387,7 @@ void GalendarForm::readApiWriterReply(QNetworkReply *reply) {
 					"text/plain");
 		}
 	}
+	reply->deleteLater();
 }
 
 void GalendarForm::on_calCombo_currentIndexChanged(const QString & calId) {
@@ -815,4 +819,8 @@ QString GalendarForm::getCalendarTimeZone(const QString &calId) const {
 
 void GalendarForm::on_eventListButton_clicked() {
 	getAllEvents();
+}
+
+void GalendarForm::on_contactsListButton_clicked() {
+
 }

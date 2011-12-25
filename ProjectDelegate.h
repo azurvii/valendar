@@ -11,7 +11,7 @@
 #include <QStyledItemDelegate>
 
 class ProjectDelegate: public QStyledItemDelegate {
-	Q_OBJECT
+Q_OBJECT
 public:
 	ProjectDelegate(QObject *parent = 0);
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
@@ -23,6 +23,7 @@ public:
 			const QStyleOptionViewItem &option, const QModelIndex &index) const;
 	void paint(QPainter *painter, const QStyleOptionViewItem &option,
 			const QModelIndex &index) const;
+	void setContacts(const QStringList &contacts);
 };
 
 #endif /* PROJECTDELEGATE_H_ */
