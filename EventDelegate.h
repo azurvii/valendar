@@ -23,9 +23,11 @@ public:
 			const QStyleOptionViewItem &option, const QModelIndex &index) const;
 	void paint(QPainter *painter, const QStyleOptionViewItem &option,
 			const QModelIndex &index) const;
+	bool editorEvent(QEvent *event, QAbstractItemModel *model,
+			const QStyleOptionViewItem &option, const QModelIndex &index);
 
 private:
-	static QString getOffsetString(int secs);
+	static QString getOffsetString(int secs, bool day = false);
 };
 
 #endif /* EVENTDELEGATE_H_ */

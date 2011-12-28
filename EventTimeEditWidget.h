@@ -17,6 +17,8 @@ public:
 	EventTimeEditWidget(bool backward = true, QWidget *parent = 0);
 	void setTime(int secs);
 	int getTime() const;
+	void setAllDayMode(bool allday);
+	void makeFocus();
 
 public slots:
 	void on_hourSpin_valueChanged(int value);
@@ -25,6 +27,7 @@ public slots:
 
 private:
 	Ui::EventTimeEditWidget ui;
+	bool allday;
 };
 
 #endif /* EVENTTIMEEDITWIDGET_H_ */

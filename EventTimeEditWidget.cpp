@@ -14,21 +14,27 @@ EventTimeEditWidget::EventTimeEditWidget(bool backward, QWidget *parent) :
 	ui.setupUi(this);
 //	cerr << "setAutoFillBackground" << endl;
 	ui.frame->setAutoFillBackground(true);
-	ui.backwardCheck->setVisible(backward);
+	ui.directionCombo->setVisible(backward);
 }
 
 void EventTimeEditWidget::setTime(int secs) {
 //	cerr << "setTime" << endl;
 	if (secs < 0) {
 		secs = -secs;
-		ui.backwardCheck->setChecked(true);
+		ui.directionCombo->setCurrentIndex(1);
 	} else {
-		ui.backwardCheck->setChecked(false);
+		ui.directionCombo->setCurrentIndex(0);
 	}
 	ui.daySpin->setValue(secs / 24 / 3600);
-	ui.hourSpin->setValue((secs % (24 * 3600)) / 3600);
-	ui.minuteSpin->setValue((secs % (3600)) / 60);
-	ui.secondSpin->setValue(secs % 60);
+	if (allday) {
+		ui.hourSpin->setValue(0);
+		ui.minuteSpin->setValue(0);
+		ui.secondSpin->setValue(0);
+	} else {
+		ui.hourSpin->setValue((secs % (24 * 3600)) / 3600);
+		ui.minuteSpin->setValue((secs % (3600)) / 60);
+		ui.secondSpin->setValue(secs % 60);
+	}
 }
 
 void EventTimeEditWidget::on_hourSpin_valueChanged(int value) {
@@ -57,10 +63,36 @@ void EventTimeEditWidget::on_secondSpin_valueChanged(int value) {
 
 int EventTimeEditWidget::getTime() const {
 //	cerr << "setTime" << endl;
-	int time = ui.daySpin->value() * 24 * 3600 + ui.hourSpin->value() * 3600
-			+ ui.minuteSpin->value() * 60 + ui.secondSpin->value();
-	if (ui.backwardCheck->isChecked()) {
+	int time;
+	if (allday) {
+		time = ui.daySpin->value() * 24 * 3600;
+	} else {
+		time = ui.daySpin->value() * 24 * 3600 + ui.hourSpin->value() * 3600
+				+ ui.minuteSpin->value() * 60 + ui.secondSpin->value();
+	}
+	if (ui.directionCombo->currentIndex()) {
 		time = -time;
 	}
 	return time;
+}
+
+void EventTimeEditWidget::setAllDayMode(bool allday) {
+	this->allday = allday;
+	if (allday) {
+//		ui.daySpin->setValue(secs / 24 / 3600);
+		ui.hourSpin->setValue(0);
+		ui.minuteSpin->setValue(0);
+		ui.secondSpin->setValue(0);
+		ui.hourSpin->setVisible(false);
+		ui.minuteSpin->setVisible(false);
+		ui.secondSpin->setVisible(false);
+	} else {
+		ui.hourSpin->setVisible(true);
+		ui.minuteSpin->setVisible(true);
+		ui.secondSpin->setVisible(true);
+	}
+}
+
+void EventTimeEditWidget::makeFocus() {
+	ui.daySpin->setFocus();
 }

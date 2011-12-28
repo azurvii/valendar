@@ -61,15 +61,27 @@ public slots:
 	void selectEvents();
 	void selectProjects();
 	void on_publishButton_clicked();
-	void on_publishProjectButton_clicked();
+	void on_calendarNewButton_clicked();
 	void on_clearDatabaseButton_clicked();
 	void on_eventListButton_clicked();
 	void on_contactsListButton_clicked();
+	void syncProjectSelection(const QModelIndex &currentIndex);
+	void contentModified();
+	void on_projectSaveButton_clicked();
+//	void on_formatAttendeeButton_clicked();
+	void on_publishExistingButton_clicked();
+	void on_aclListButton_clicked();
+	void createAcl(const QString &calId, const QString &attendees,
+			const QString &role = "writer");
+	void on_editEventsButton_clicked();
+	void on_backToOverviewButton_clicked();
 
 protected:
-	virtual void closeEvent(QCloseEvent * event);
+	virtual void closeEvent(QCloseEvent *event);
+	bool eventFilter(QObject *object, QEvent *event);
 
 private:
+	static QString addNewCalendarString;
 	Ui::GalendarForm ui;
 	QNetworkAccessManager *accTokenNetMan;
 	QNetworkAccessManager *apiReaderNetMan;
@@ -93,18 +105,27 @@ private:
 	QString dbName;
 	int currentProjectId;
 	int currentEventId;
+	bool projectAttributesEdited;
+	QString newCalId;
 
 private:
 	static QString getTimestamp();
 	static QString getNewEventPost(const QString &eventName,
 			const QString &startDateTime, const QString &endDateTime,
-			const QString &description = QString(), const QString &location =
-					QString(), const QStringList &attendees = QStringList(),
-			const QString &timeZone = QString());
-	void createEvent(const QString &eventName, const QString &startDateTime,
-			const QString &endDateTime, const QString &description = QString(),
+			bool allday = false, const QString &description = QString(),
 			const QString &location = QString(), const QStringList &attendees =
 					QStringList(), const QString &timeZone = QString());
+	static QString getNewCalendarPost(const QString &calendarName,
+			const QString &timeZone = QString());
+	static QString getNewAclPost(const QString &attendee, const QString &role =
+			"writer");
+	void createEvent(const QString &calId, const QString &eventName,
+			const QString &startDateTime, const QString &endDateTime,
+			bool allday = false, const QString &description = QString(),
+			const QString &location = QString(), const QStringList &attendees =
+					QStringList(), const QString &timeZone = QString());
+	void createCalendar(const QString &calendarName, const QString &timeZone =
+			QString());
 	QString getCurrentCalendarId() const;
 	QString getCurrentEventId() const;
 	QString getCalendarTimeZone(const QString &calId) const;
@@ -117,8 +138,10 @@ private:
 //	void updateCalCombo(const QStringList &calNames);
 //	void updateEventCombo(const QStringList &eventNames);
 	void getAllEventsFromCalendar(const QString &calId);
+	void getAclFromCalendar(const QString &calId);
 	bool prepareDB();
 	QScriptValue getCalendarById(const QString &calId) const;
+	void publishCalendarId(const QString &calId);
 };
 
 #endif /* GALENDARFORM_H_ */

@@ -10,12 +10,10 @@ INCLUDEPATH += .
 # Input
 HEADERS += EventDelegate.h \
            EventTimeEditWidget.h \
-           GalendarForm.h \
-           ProjectDelegate.h
+           GalendarForm.h
 FORMS += EventTimeEditWidget.ui GalendarForm.ui
 SOURCES += EventDelegate.cpp \
            EventTimeEditWidget.cpp \
            GalendarForm.cpp \
-           main.cpp \
-           ProjectDelegate.cpp
+           main.cpp
 include(qmake.conf)

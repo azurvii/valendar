@@ -12,7 +12,9 @@
 #include <QtSql>
 #include <iostream>
 #include "EventDelegate.h"
-#include "ProjectDelegate.h"
+//#include "ProjectDelegate.h"
+
+QString GalendarForm::addNewCalendarString = QString("+ New Calendar");
 
 GalendarForm::GalendarForm(QWidget *parent) :
 		QWidget(parent) {
@@ -30,6 +32,7 @@ void GalendarForm::on_authorizeButton_clicked() {
 	QString requestUrl = oaAuthUrl + "?" + requestParam;
 //	log(requestUrl);
 	ui.webView->load(QNetworkRequest(QUrl(requestUrl)));
+	ui.webView->setFocus();
 }
 
 void GalendarForm::on_webView_urlChanged(const QUrl &url) {
@@ -58,10 +61,11 @@ void GalendarForm::init() {
 	oaClientSecret = "_CPiLDKpv117r4JS0TNGJx71";
 	oaScope = "https://www.googleapis.com/auth/userinfo.email "
 			"https://www.googleapis.com/auth/calendar "
-			"https://www.google.com/m8/feeds";
+			"http://www-opensocial.googleusercontent.com/api/people";
 	calApiBaseUrl = "https://www.googleapis.com/calendar/v3";
 	currentProjectId = -1;
 	currentEventId = -1;
+	projectAttributesEdited = false;
 	QString storePath = QDesktopServices::storageLocation(
 			QDesktopServices::DataLocation);
 	QDir().mkpath(storePath);
@@ -81,8 +85,12 @@ void GalendarForm::init() {
 //	ui.afterAuthWidget->setEnabled(false);
 //	ui.afterCalListWidget->setEnabled(false);
 //	ui.eventTable->setItemDelegate(new EventDelegate(this));
-//	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
-	ui.publishDateTimeEdit->setDate(QDate::currentDate());
+//	ui.projectView->setItemDelegate(new ProjectDelegate(this));
+	ui.publishDateEdit->setDate(QDate::currentDate());
+//	ui.formatAttendeeButton->setVisible(false);
+//	ui.projectSaveButton->setEnabled(false);
+	ui.projectNoteEdit->installEventFilter(this);
+	ui.projectAttendeeEdit->installEventFilter(this);
 	setDebugWidgetsVisible(debugMode);
 	prepareDB();
 }
@@ -95,12 +103,19 @@ void GalendarForm::makeConnections() {
 			SLOT(setValue(int)));
 	connect(ui.testWebView, SIGNAL(loadProgress(int)), ui.testProgressBar,
 			SLOT(setValue(int)));
-	connect(accTokenNetMan, SIGNAL(finished(QNetworkReply *)), this,
+	connect(accTokenNetMan, SIGNAL(finished(QNetworkReply *)),
 			SLOT(readAccessToken(QNetworkReply *)));
-	connect(apiReaderNetMan, SIGNAL(finished(QNetworkReply *)), this,
+	connect(apiReaderNetMan, SIGNAL(finished(QNetworkReply *)),
 			SLOT(readApiReaderReply(QNetworkReply *)));
-	connect(apiWriterNetMan, SIGNAL(finished(QNetworkReply *)), this,
+	connect(apiWriterNetMan, SIGNAL(finished(QNetworkReply *)),
 			SLOT(readApiWriterReply(QNetworkReply *)));
+	connect(
+			ui.projectView->selectionModel(),
+			SIGNAL(currentRowChanged(const QModelIndex &, const QModelIndex &)),
+			this, SLOT(syncProjectSelection(const QModelIndex &)));
+	connect(ui.projectNoteEdit, SIGNAL(textChanged()), SLOT(contentModified()));
+	connect(ui.projectAttendeeEdit, SIGNAL(textChanged()),
+			SLOT(contentModified()));
 }
 
 void GalendarForm::readReply(QNetworkReply *reply) {
@@ -252,11 +267,13 @@ void GalendarForm::setDebugWidgetsVisible(bool visible) {
 		ui.tabWidget->addTab(ui.testTab, tr("Test"));
 		ui.tabWidget->addTab(ui.scriptTab, tr("Script"));
 		ui.tabWidget->addTab(ui.pubTab, tr("Publication"));
+		ui.tabWidget->addTab(ui.contactsTab, tr("Contacts test"));
 	} else {
 		ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.logTab));
 		ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.testTab));
 		ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.scriptTab));
 		ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.pubTab));
+		ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.contactsTab));
 	}
 }
 
@@ -340,11 +357,16 @@ void GalendarForm::readApiReaderReply(QNetworkReply *reply) {
 				log("- " + calId + " --> " + calName);
 			}
 		}
+//		ui.calCombo->adjustSize();
+		if (!newCalId.isEmpty()) {
+			int idx = ui.calCombo->findData(newCalId, Qt::UserRole);
+			ui.calCombo->setCurrentIndex(idx < 0 ? 0 : idx);
+			newCalId = "";
+		}
+		ui.calCombo->addItem(addNewCalendarString);
 //		ui.afterCalListWidget->setEnabled(true);
 		if (!debugMode) {
-			ui.webView->setContent(
-					tr("Please select a calendar from the combo box "
-							"and a date to publish your project.").toUtf8(),
+			ui.webView->setContent(tr("Ready to proceed").toUtf8(),
 					"text/plain");
 		}
 	} else if (requestUrl.contains("/calendars/")
@@ -372,27 +394,71 @@ void GalendarForm::readApiWriterReply(QNetworkReply *reply) {
 		ui.webView->setContent(bytes, "text/plain");
 	}
 	QScriptValue result = scriptEngine.evaluate("(" + QString(bytes) + ")");
-	QString id = result.property("id").toString();
-	if (id.isEmpty()) {
-		log(tr("[ERROR] Event creation failed"));
-		if (!debugMode) {
-			ui.webView->setContent(tr("ERROR! Event creation failed. "
-					"Please check network connection first.").toUtf8(),
-					"text/plain");
+	QString kind = result.property("kind").toString();
+	if (kind.compare("calendar#event") == 0) {
+		QString id = result.property("id").toString();
+		if (id.isEmpty()) {
+			log(tr("[ERROR] Event creation failed"));
+			if (!debugMode) {
+				ui.webView->setContent(tr("ERROR! Event creation failed. "
+						"Please check network connection first.").toUtf8(),
+						"text/plain");
+			}
+		} else {
+			log(tr("[INFO] Event created with id %1").arg(id));
+			if (!debugMode) {
+				ui.webView->setContent(tr("Project published.").toUtf8(),
+						"text/plain");
+			}
+		}
+	} else if (kind.compare("calendar#calendar") == 0) {
+		QString id = result.property("id").toString();
+		if (id.isEmpty()) {
+			log(tr("[ERROR] Calendar creation failed"));
+			if (!debugMode) {
+				ui.webView->setContent(tr("ERROR! Calendar creation failed. "
+						"Please check network connection first.").toUtf8(),
+						"text/plain");
+			}
+		} else {
+			log(tr("[INFO] Calendar created with id %1").arg(id));
+			if (!debugMode) {
+				ui.webView->setContent(tr("Calendar created.").toUtf8(),
+						"text/plain");
+			}
+			newCalId = id;
+			QTimer::singleShot(500, this, SLOT(getAllCalendars()));
+		}
+	} else if (kind.compare("calendar#aclRule") == 0) {
+		QString id = result.property("id").toString();
+		if (id.isEmpty()) {
+			log(tr("[ERROR] ACL creation failed"));
+			if (!debugMode) {
+				ui.webView->setContent(
+						tr("ERROR! ACL creation failed.").toUtf8(),
+						"text/plain");
+			}
+		} else {
+			log(tr("[INFO] ACL created with id %1").arg(id));
+			if (!debugMode) {
+				ui.webView->setContent(tr("ACL created.").toUtf8(),
+						"text/plain");
+			}
 		}
 	} else {
-		log(tr("[INFO] Event created with id %1").arg(id));
-		if (!debugMode) {
-			ui.webView->setContent(tr("Project published.").toUtf8(),
-					"text/plain");
-		}
+		log(tr("[WARNING] Unexpected reply recevied."));
+		log(bytes);
 	}
 	reply->deleteLater();
 }
 
 void GalendarForm::on_calCombo_currentIndexChanged(const QString & calId) {
 	log(tr("[DEBUG] on_calCombo_currentIndexChanged(%1)").arg(calId));
-//	getAllEvents();
+	if (calId.compare(addNewCalendarString) == 0) {
+		ui.calCombo->clear();
+		ui.calCombo->addItem(tr("Populating calendars..."));
+		ui.calendarNewButton->click();
+	}
 }
 
 void GalendarForm::getAllEvents() {
@@ -445,7 +511,7 @@ void GalendarForm::on_eventCreateButton_clicked() {
 //	req.setRawHeader("Authorization", ("Bearer " + accToken).toUtf8());
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 	apiWriterNetMan->post(req,
-			getNewEventPost(eventName, start, end, timeZone).toUtf8());
+			getNewEventPost(eventName, start, end, false, timeZone).toUtf8());
 }
 
 //POST /calendar/v3/calendars/primary/events
@@ -469,13 +535,14 @@ void GalendarForm::on_eventCreateButton_clicked() {
 //  ],
 //}
 QString GalendarForm::getNewEventPost(const QString &eventName,
-		const QString &startDateTime, const QString &endDateTime,
+		const QString &startDateTime, const QString &endDateTime, bool allday,
 		const QString &description, const QString &location,
 		const QStringList &attendees, const QString &timeZone) {
 	QString result = "{\"summary\":\"" + eventName + "\",\"location\":\""
 			+ location + "\",\"description\":\"" + description
-			+ "\",\"start\":{\"dateTime\":\"" + startDateTime
-			+ "\",\"timeZone\":\"" + timeZone + "\"},\"end\":{\"dateTime\":\""
+			+ "\",\"start\":{\"" + (allday ? "date" : "dateTime") + "\":\""
+			+ startDateTime + "\",\"timeZone\":\"" + timeZone
+			+ "\"},\"end\":{\"" + (allday ? "date" : "dateTime") + "\":\""
 			+ endDateTime + "\",\"timeZone\":\"" + timeZone + "\"}";
 	if (attendees.size() > 0) {
 		result += ",\"attendees\":[";
@@ -488,6 +555,13 @@ QString GalendarForm::getNewEventPost(const QString &eventName,
 		result += "]";
 	}
 	result += "}";
+	return result;
+}
+
+QString GalendarForm::getNewCalendarPost(const QString &calendarName,
+		const QString &timeZone) {
+	QString result = "{\"summary\":\"" + calendarName + "\",\"timeZone\":\""
+			+ timeZone + "\"}";
 	return result;
 }
 
@@ -529,6 +603,7 @@ bool GalendarForm::prepareDB() {
 			"note TEXT, "
 			"start INTEGER, "
 			"length INTEGER, "
+			"allday INTEGER, "
 			"attendees TEXT, "
 			"projId INTEGER)")) {
 		QMessageBox::critical(0, qApp->tr("Creating Event table failed"),
@@ -564,18 +639,20 @@ bool GalendarForm::prepareDB() {
 //	projectModel->removeColumn(0); // DO NOT use this method! It fails model-view auto-sync.
 //	projectModel->setHeaderData(0, Qt::Horizontal, tr("ID"));
 	projectModel->setHeaderData(1, Qt::Horizontal, tr("Name"));
-	projectModel->setHeaderData(2, Qt::Horizontal, tr("Note"));
-	projectModel->setHeaderData(3, Qt::Horizontal, tr("Created"));
-	projectModel->setHeaderData(4, Qt::Horizontal, tr("Attendees"));
+//	projectModel->setHeaderData(2, Qt::Horizontal, tr("Note"));
+//	projectModel->setHeaderData(3, Qt::Horizontal, tr("Created"));
+//	projectModel->setHeaderData(4, Qt::Horizontal, tr("Attendees"));
 
 //	eventModel->setTable("event");
-	ui.projectTable->setModel(projectModel);
-	ui.projectTable->hideColumn(0);
-	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
+	ui.projectView->setModel(projectModel);
+	ui.projectView->setModelColumn(1);
+//	ui.projectView->hideColumn(0);
+//	ui.projectView->setItemDelegate(new ProjectDelegate(this));
 	connect(
-			ui.projectTable->selectionModel(),
+			ui.projectView->selectionModel(),
 			SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(selectedProjectChanged()));
+//	ui.projectView->selectionModel()->setCurrentIndex()
 	return true;
 }
 
@@ -591,7 +668,7 @@ void GalendarForm::on_projectAddButton_clicked() {
 }
 
 void GalendarForm::on_projectDeleteButton_clicked() {
-	QModelIndex curIndex = ui.projectTable->selectionModel()->currentIndex();
+	QModelIndex curIndex = ui.projectView->selectionModel()->currentIndex();
 	if (curIndex.isValid()) {
 		QSqlQuery query;
 		query.prepare("DELETE FROM project WHERE id=:projid");
@@ -604,8 +681,8 @@ void GalendarForm::on_projectDeleteButton_clicked() {
 }
 
 void GalendarForm::selectedProjectChanged() {
-	QSqlTableModel * projectModel = (QSqlTableModel *) ui.projectTable->model();
-	int currentRow = ui.projectTable->currentIndex().row();
+	QSqlTableModel * projectModel = (QSqlTableModel *) ui.projectView->model();
+	int currentRow = ui.projectView->currentIndex().row();
 	currentProjectId = projectModel->record(currentRow).value("id").toInt();
 	selectEvents();
 }
@@ -617,15 +694,17 @@ void GalendarForm::selectedEventChanged() {
 }
 
 void GalendarForm::on_eventAddButton_clicked() {
-	QModelIndex curIndex = ui.projectTable->selectionModel()->currentIndex();
+	QModelIndex curIndex = ui.projectView->selectionModel()->currentIndex();
 	if (curIndex.isValid()) {
 		QSqlQuery query;
-		query.prepare("INSERT INTO event (name, note, start, length, projid) "
-				"VALUES (:name, :note, :start, :length, :projid)");
+		query.prepare(
+				"INSERT INTO event (name, note, start, length, allday, projid) "
+						"VALUES (:name, :note, :start, :length, :allday, :projid)");
 		query.bindValue(":name", "Event");
 		query.bindValue(":note", "Event note");
-		query.bindValue(":start", 0);
+		query.bindValue(":start", 9 * 3600);
 		query.bindValue(":length", 25 * 60);
+		query.bindValue(":allday", 0);
 		query.bindValue(":projid", currentProjectId);
 		query.exec();
 		selectEvents();
@@ -648,13 +727,14 @@ void GalendarForm::selectEvents() {
 	eventModel->setHeaderData(2, Qt::Horizontal, tr("Note"));
 	eventModel->setHeaderData(3, Qt::Horizontal, tr("Start"));
 	eventModel->setHeaderData(4, Qt::Horizontal, tr("Duration"));
-	eventModel->setHeaderData(5, Qt::Horizontal, tr("Attendees"));
+	eventModel->setHeaderData(5, Qt::Horizontal, tr("All day?"));
+//	eventModel->setHeaderData(6, Qt::Horizontal, tr("Attendees"));
 
 //	eventModel->setTable("event");
 	ui.eventTable->setModel(eventModel);
 	ui.eventTable->hideColumn(0);
 	ui.eventTable->hideColumn(6);
-	ui.eventTable->hideColumn(5);
+	ui.eventTable->hideColumn(7);
 	ui.eventTable->setItemDelegate(new EventDelegate(this));
 	connect(
 			ui.eventTable->selectionModel(),
@@ -663,7 +743,7 @@ void GalendarForm::selectEvents() {
 }
 
 void GalendarForm::selectProjects() {
-	QSqlTableModel * projectModel = (QSqlTableModel *) ui.projectTable->model();
+	QSqlTableModel * projectModel = (QSqlTableModel *) ui.projectView->model();
 //	QSqlRecord newRecord;
 //	newRecord.setValue("creation",
 //			QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
@@ -672,8 +752,12 @@ void GalendarForm::selectProjects() {
 //			QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
 	projectModel->setEditStrategy(QSqlTableModel::OnFieldChange);
 	projectModel->select();
-	ui.projectTable->hideColumn(0);
-//	ui.projectTable->setItemDelegate(new ProjectDelegate(this));
+//	ui.projectView->setCurrentIndex(projectModel->index(0, 1));
+//	ui.projectView->hideColumn(0);
+//	ui.projectView->hideColumn(2);
+//	ui.projectView->hideColumn(3);
+//	ui.projectView->hideColumn(4);
+//	ui.projectView->setItemDelegate(new ProjectDelegate(this));
 }
 
 void GalendarForm::on_eventDeleteButton_clicked() {
@@ -704,6 +788,9 @@ void GalendarForm::loadSettings() {
 	restoreGeometry(settings.value("geometry", saveGeometry()).toByteArray());
 //	ui.tabWidget->setCurrentIndex(
 //			settings.value("currentTab", ui.tabWidget->currentIndex()).toInt());
+	ui.projectSplitter->restoreState(
+			settings.value("projectSplitter").toByteArray());
+	ui.infoSplitter->restoreState(settings.value("infoSplitter").toByteArray());
 	settings.endGroup();
 }
 
@@ -712,56 +799,23 @@ void GalendarForm::saveSettings() {
 	settings.beginGroup("gui");
 	settings.setValue("geometry", saveGeometry());
 //	settings.setValue("currentTab", ui.tabWidget->currentIndex());
+	settings.setValue("projectSplitter", ui.projectSplitter->saveState());
+	settings.setValue("infoSplitter", ui.infoSplitter->saveState());
 	settings.endGroup();
 }
 
-void GalendarForm::on_publishProjectButton_clicked() {
-//	QSqlTableModel * eventModel = new QSqlTableModel;
-//	eventModel->setTable("event");
-	QSqlQuery query;
-	query.prepare("SELECT name, note, start, length FROM Event "
-			"WHERE projid=:projid");
-	query.bindValue(":projid", currentProjectId);
-	query.exec();
-	QString summary;
-	QString description;
-	int start;
-	int length;
-	QString startString;
-	QString endString;
-	while (query.next()) {
-		summary = query.value(0).toString();
-		description = query.value(1).toString();
-		start = query.value(2).toInt();
-		length = query.value(3).toInt();
-		QDateTime origin = ui.publishDateTimeEdit->dateTime();
-		startString = QDateTime::fromTime_t(origin.toTime_t() + start).toString(
-				"yyyy-MM-ddThh:mm:ss");
-		endString =
-				QDateTime::fromTime_t(origin.toTime_t() + start + length).toString(
-						"yyyy-MM-ddThh:mm:ss");
-		createEvent(summary, startString, endString, description);
+void GalendarForm::on_calendarNewButton_clicked() {
+	if (accToken.isEmpty()) {
+		ui.webView->setContent(tr("Please log in first.").toUtf8(),
+				"text/plain");
+		return;
 	}
-//	eventModel->setFilter("projid=" + QString::number(currentProjectId));
-//	if (!eventModel->select()) {
-//		QMessageBox::critical(0, qApp->tr("Selecting events failed"),
-//				qApp->tr("Click Cancel to exit."), QMessageBox::Cancel);
-//	}
-//	eventModel->removeColumn(5); // don't show the ID
-//	eventModel->removeColumn(0); // don't show the ID
-////	eventModel->setHeaderData(0, Qt::Horizontal, tr("ID"));
-//	eventModel->setHeaderData(0, Qt::Horizontal, tr("Name"));
-//	eventModel->setHeaderData(1, Qt::Horizontal, tr("Note"));
-//	eventModel->setHeaderData(2, Qt::Horizontal, tr("Start"));
-//	eventModel->setHeaderData(3, Qt::Horizontal, tr("Duration"));
-//
-////	eventModel->setTable("event");
-//	ui.eventTable->setModel(eventModel);
-////	ui.eventTable->setItemDelegate(new EventDelegate(this));
-//	connect(
-//			ui.eventTable->selectionModel(),
-//			SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-//			this, SLOT(selectedEventChanged()));
+	QString calName = QInputDialog::getText(this, tr("Calendar Name"),
+			tr("Name the calendar to be published"));
+	if (calName.isEmpty()) {
+		return;
+	}
+	createCalendar(calName);
 }
 
 void GalendarForm::on_clearDatabaseButton_clicked() {
@@ -770,20 +824,20 @@ void GalendarForm::on_clearDatabaseButton_clicked() {
 	prepareDB();
 }
 
-void GalendarForm::createEvent(const QString &eventName,
-		const QString &startDateTime, const QString &endDateTime,
+void GalendarForm::createEvent(const QString &calId, const QString &eventName,
+		const QString &startDateTime, const QString &endDateTime, bool allday,
 		const QString &description, const QString &location,
 		const QStringList &attendees, const QString &timeZone) {
 	if (accToken.isEmpty()) {
 		log("[ERROR] No access token, no event created.");
 		return;
 	}
-	QString requestUrl = calApiBaseUrl + "/calendars/" + getCurrentCalendarId()
+	QString requestUrl = calApiBaseUrl + "/calendars/" + calId
 			+ "/events?access_token=" + accToken;
 	log(requestUrl);
 	log(
-			getNewEventPost(eventName, startDateTime, endDateTime, description,
-					location, attendees, timeZone));
+			getNewEventPost(eventName, startDateTime, endDateTime, allday,
+					description, location, attendees, timeZone));
 	QNetworkRequest req = QNetworkRequest(QUrl(requestUrl));
 //	req.setRawHeader("Authorization", ("Bearer " + accToken).toUtf8());
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -793,9 +847,31 @@ void GalendarForm::createEvent(const QString &eventName,
 					eventName,
 					startDateTime,
 					endDateTime,
+					allday,
 					description,
 					location,
 					attendees,
+					(timeZone.isEmpty() ?
+							getCalendarTimeZone(getCurrentCalendarId()) :
+							timeZone)).toUtf8());
+}
+
+void GalendarForm::createCalendar(const QString &calendarName,
+		const QString &timeZone) {
+	if (accToken.isEmpty()) {
+		log("[ERROR] No access token, no event created.");
+		return;
+	}
+	QString requestUrl = calApiBaseUrl + "/calendars?access_token=" + accToken;
+	log(requestUrl);
+	log(getNewCalendarPost(calendarName, timeZone));
+	QNetworkRequest req = QNetworkRequest(QUrl(requestUrl));
+//	req.setRawHeader("Authorization", ("Bearer " + accToken).toUtf8());
+	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+	apiWriterNetMan->post(
+			req,
+			getNewCalendarPost(
+					calendarName,
 					(timeZone.isEmpty() ?
 							getCalendarTimeZone(getCurrentCalendarId()) :
 							timeZone)).toUtf8());
@@ -824,3 +900,203 @@ void GalendarForm::on_eventListButton_clicked() {
 void GalendarForm::on_contactsListButton_clicked() {
 
 }
+
+void GalendarForm::syncProjectSelection(const QModelIndex & currentIndex) {
+//	std::cout << currentIndex.row() << "," << currentIndex.column()
+//			<< std::endl;
+	ui.projectView->selectionModel()->setCurrentIndex(currentIndex,
+			QItemSelectionModel::Select);
+	if (currentIndex.isValid()) {
+		int row = currentIndex.row();
+//		QAbstractItemModel * model = ui.projectView->model();
+		ui.projectNoteEdit->setText(
+				currentIndex.sibling(row, 2).data().toString());
+		ui.projectCreatedEdit->setText(
+				QDateTime::fromTime_t(
+						currentIndex.sibling(row, 3).data().toInt()).toString());
+		ui.projectAttendeeEdit->setText(
+				currentIndex.sibling(row, 4).data().toString());
+		projectAttributesEdited = false;
+	} else {
+		ui.projectCreatedEdit->clear();
+		ui.projectNoteEdit->clear();
+		ui.projectAttendeeEdit->clear();
+	}
+}
+
+void GalendarForm::contentModified() {
+	projectAttributesEdited = true;
+}
+
+void GalendarForm::on_projectSaveButton_clicked() {
+	QModelIndex index = ui.projectView->currentIndex();
+	QAbstractItemModel * model = ui.projectView->model();
+	if (index.isValid()) {
+		int row = index.row();
+		model->setData(index.sibling(row, 2),
+				QVariant(ui.projectNoteEdit->toPlainText()));
+//		ui.formatAttendeeButton->click();
+		model->setData(index.sibling(row, 4),
+				QVariant(ui.projectAttendeeEdit->toPlainText()));
+		((QSqlTableModel *) model)->submit();
+		ui.projectView->selectionModel()->setCurrentIndex(index,
+				QItemSelectionModel::Select);
+		syncProjectSelection(index);
+	}
+	projectAttributesEdited = false;
+//	ui.projectSaveButton->setEnabled(false);
+}
+
+//void GalendarForm::on_formatAttendeeButton_clicked() {
+//	QString text = ui.projectAttendeeEdit->toPlainText();
+//	ui.projectAttendeeEdit->clear();
+//	QTextStream in(&text);
+//	QString line = in.readLine();
+//	while (!line.isNull()) {
+//		if (!line.isEmpty()) {
+//			ui.projectAttendeeEdit->append(line.trimmed());
+//		}
+//		line = in.readLine();
+//	}
+//}
+
+void GalendarForm::publishCalendarId(const QString &calId) {
+	//	QSqlTableModel * eventModel = new QSqlTableModel;
+	//	eventModel->setTable("event");
+
+	QSqlQuery query;
+	query.prepare("SELECT name, note, start, length, allday FROM Event "
+			"WHERE projid=:projid");
+	query.bindValue(":projid", currentProjectId);
+	query.exec();
+	QString summary;
+	QString description;
+	int start;
+	int length;
+	QString startString;
+	QString endString;
+	bool allday;
+	while (query.next()) {
+		summary = query.value(0).toString();
+		description = query.value(1).toString();
+		start = query.value(2).toInt();
+		length = query.value(3).toInt();
+		allday = query.value(4).toBool();
+		QDateTime origin = ui.publishDateEdit->dateTime();
+		startString = QDateTime::fromTime_t(origin.toTime_t() + start).toString(
+				allday ? "yyyy-MM-dd" : "yyyy-MM-ddThh:mm:ss");
+		endString =
+				QDateTime::fromTime_t(origin.toTime_t() + start + length).toString(
+						allday ? "yyyy-MM-dd" : "yyyy-MM-ddThh:mm:ss");
+		createEvent(calId, summary, startString, endString, allday,
+				description);
+	}
+	query.prepare("SELECT attendees FROM Project "
+			"WHERE id=:projid");
+	query.bindValue(":projid", currentProjectId);
+	query.exec();
+	QString attendees;
+	if (query.next()) {
+		attendees = query.value(0).toString().trimmed();
+		if (!attendees.isEmpty()) {
+			createAcl(calId, attendees);
+		}
+	}
+	//	eventModel->setFilter("projid=" + QString::number(currentProjectId));
+	//	if (!eventModel->select()) {
+	//		QMessageBox::critical(0, qApp->tr("Selecting events failed"),
+	//				qApp->tr("Click Cancel to exit."), QMessageBox::Cancel);
+	//	}
+	//	eventModel->removeColumn(5); // don't show the ID
+	//	eventModel->removeColumn(0); // don't show the ID
+	////	eventModel->setHeaderData(0, Qt::Horizontal, tr("ID"));
+	//	eventModel->setHeaderData(0, Qt::Horizontal, tr("Name"));
+	//	eventModel->setHeaderData(1, Qt::Horizontal, tr("Note"));
+	//	eventModel->setHeaderData(2, Qt::Horizontal, tr("Start"));
+	//	eventModel->setHeaderData(3, Qt::Horizontal, tr("Duration"));
+	//
+	////	eventModel->setTable("event");
+	//	ui.eventTable->setModel(eventModel);
+	////	ui.eventTable->setItemDelegate(new EventDelegate(this));
+	//	connect(
+	//			ui.eventTable->selectionModel(),
+	//			SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+	//			this, SLOT(selectedEventChanged()));
+}
+
+void GalendarForm::on_publishExistingButton_clicked() {
+	if (currentProjectId < 0) {
+		log(tr("[INFO] No project selected"));
+		ui.webView->setContent(
+				tr("No project selected for publishing.").toUtf8(),
+				"text/plain");
+	}
+	if (ui.calCombo->currentIndex() >= 0) {
+		publishCalendarId(getCurrentCalendarId());
+	} else {
+		log(tr("[INFO] No calendar selected"));
+		ui.webView->setContent(
+				tr("No calendar selected for publishing.").toUtf8(),
+				"text/plain");
+	}
+}
+
+void GalendarForm::on_aclListButton_clicked() {
+	if (accToken.isEmpty()) {
+		return;
+	}
+	getAclFromCalendar(getCurrentCalendarId());
+}
+
+void GalendarForm::getAclFromCalendar(const QString &calId) {
+	QString aclListUrl = calApiBaseUrl + "/calendars/" + calId + "/acl"
+			"?access_token=" + accToken;
+	log(aclListUrl);
+	apiReaderNetMan->get(QNetworkRequest(QUrl(aclListUrl)));
+}
+
+QString GalendarForm::getNewAclPost(const QString &attendee,
+		const QString &role) {
+	QString result = "{\"scope\":{\"type\":\"user\",\"value\":\"" + attendee
+			+ "\"},\"role\":\"" + role + "\"}";
+	return result;
+}
+
+void GalendarForm::createAcl(const QString &calId, const QString &attendees,
+		const QString &role) {
+	if (accToken.isEmpty()) {
+		log("[ERROR] No access token, no event created.");
+		ui.webView->setContent(tr("Please log in").toUtf8(), "text/plain");
+		return;
+	}
+	QString requestUrl = calApiBaseUrl + "/calendars/" + calId
+			+ "/acl?access_token=" + accToken;
+	QStringList list = attendees.split("\n", QString::SkipEmptyParts);
+	log(requestUrl);
+	foreach(QString attendee, list) {
+		log(getNewAclPost(attendee, role));
+		QNetworkRequest req = QNetworkRequest(QUrl(requestUrl));
+		//	req.setRawHeader("Authorization", ("Bearer " + accToken).toUtf8());
+		req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+		apiWriterNetMan->post(req, getNewAclPost(attendee, role).toUtf8());
+	}
+}
+
+void GalendarForm::on_editEventsButton_clicked() {
+	ui.tabWidget->setCurrentWidget(ui.eventTab);
+}
+
+bool GalendarForm::eventFilter(QObject *object, QEvent *event) {
+	if (event->type() == QEvent::FocusOut
+			&& (object == ui.projectNoteEdit || object == ui.projectAttendeeEdit)) {
+//		QFocusEvent *focusEvent = static_cast<QFocusEvent *>(event);
+		ui.projectSaveButton->click();
+		return false;
+	}
+	return false;
+}
+
+void GalendarForm::on_backToOverviewButton_clicked() {
+	ui.tabWidget->setCurrentWidget(ui.projectTab);
+}
+

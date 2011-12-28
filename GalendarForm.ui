@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>846</width>
-    <height>951</height>
+    <width>712</width>
+    <height>631</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,59 +17,192 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>7</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="projectTab">
       <attribute name="title">
        <string>Project</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
+      <layout class="QHBoxLayout" name="horizontalLayout_11">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8">
-         <item>
-          <widget class="QPushButton" name="projectAddButton">
-           <property name="text">
-            <string>Add</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="projectDeleteButton">
-           <property name="text">
-            <string>Delete</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="publishButton">
-           <property name="text">
-            <string>Publish</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_6">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableView" name="projectTable">
-         <property name="selectionMode">
-          <enum>QAbstractItemView::SingleSelection</enum>
+        <widget class="QSplitter" name="projectSplitter">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
-         <property name="sortingEnabled">
-          <bool>true</bool>
-         </property>
+         <widget class="QWidget" name="layoutWidget">
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_14">
+             <item>
+              <widget class="QPushButton" name="projectAddButton">
+               <property name="text">
+                <string>Add</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="projectDeleteButton">
+               <property name="text">
+                <string>Delete</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <item>
+              <widget class="QLabel" name="label_11">
+               <property name="text">
+                <string>Project list</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QListView" name="projectView">
+             <property name="dragEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>true</bool>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Information</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_12">
+           <item>
+            <widget class="QSplitter" name="infoSplitter">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <widget class="QWidget" name="layoutWidget">
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_2">
+                 <item>
+                  <widget class="QPushButton" name="projectSaveButton">
+                   <property name="text">
+                    <string>Save</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="editEventsButton">
+                   <property name="text">
+                    <string>Edit events</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="publishButton">
+                   <property name="text">
+                    <string>Publish</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_10">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_10">
+                 <property name="text">
+                  <string>Note</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QTextEdit" name="projectNoteEdit"/>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="layoutWidget">
+              <layout class="QVBoxLayout" name="verticalLayout_11">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_6">
+                 <item>
+                  <widget class="QLabel" name="label_9">
+                   <property name="text">
+                    <string>Attendees (one per line)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QTextEdit" name="projectAttendeeEdit"/>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_12">
+             <item>
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Created on</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="projectCreatedEdit">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -108,10 +241,32 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="backToOverviewButton">
+           <property name="text">
+            <string>Back to overview</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
         <widget class="QTableView" name="eventTable">
+         <property name="editTriggers">
+          <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="dragDropMode">
+          <enum>QAbstractItemView::DragDrop</enum>
+         </property>
+         <property name="defaultDropAction">
+          <enum>Qt::CopyAction</enum>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::SingleSelection</enum>
          </property>
@@ -172,38 +327,35 @@
             <item>
              <widget class="QPushButton" name="calListButton">
               <property name="text">
-               <string>Get calendars</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="calCombo"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="calCheckButton">
-              <property name="text">
-               <string>Check calendars</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="eventCheckButton">
-              <property name="text">
-               <string>Check events</string>
+               <string>Get cal</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="eventCreateButton">
               <property name="text">
-               <string>Create event</string>
+               <string>Create evt</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="aclListButton">
+              <property name="text">
+               <string>Get acl</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="eventListButton">
               <property name="text">
-               <string>Get events</string>
+               <string>Get evt</string>
               </property>
              </widget>
             </item>
@@ -212,6 +364,44 @@
             </item>
             <item>
              <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0" colspan="2">
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <item>
+             <widget class="QPushButton" name="calCheckButton">
+              <property name="text">
+               <string>Chk cal</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="eventCheckButton">
+              <property name="text">
+               <string>Chk evt</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="calendarNewButton">
+              <property name="text">
+               <string>(Create a calender)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_9">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -245,9 +435,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QDateTimeEdit" name="publishDateTimeEdit">
+          <widget class="QDateEdit" name="publishDateEdit">
            <property name="displayFormat">
-            <string>MM/dd/yyyy hh:mm</string>
+            <string>MM/dd/yyyy</string>
            </property>
            <property name="calendarPopup">
             <bool>true</bool>
@@ -262,14 +452,17 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="publishProjectButton">
+          <widget class="QPushButton" name="publishExistingButton">
            <property name="text">
-            <string>Publish Project</string>
+            <string>Publish Project in</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_9">
+          <widget class="QComboBox" name="calCombo"/>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_11">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>

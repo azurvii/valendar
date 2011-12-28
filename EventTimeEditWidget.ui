@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>94</width>
-    <height>125</height>
+    <width>115</width>
+    <height>134</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -111,10 +111,17 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="backwardCheck">
-        <property name="text">
-         <string>Backward</string>
-        </property>
+       <widget class="QComboBox" name="directionCombo">
+        <item>
+         <property name="text">
+          <string>Forward</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Backward</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
