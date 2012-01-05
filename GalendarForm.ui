@@ -98,7 +98,7 @@
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
-             <widget class="QWidget" name="layoutWidget">
+             <widget class="QWidget" name="layoutWidget1">
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -150,14 +150,14 @@
                </item>
               </layout>
              </widget>
-             <widget class="QWidget" name="layoutWidget">
+             <widget class="QWidget" name="layoutWidget2">
               <layout class="QVBoxLayout" name="verticalLayout_11">
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_6">
                  <item>
                   <widget class="QLabel" name="label_9">
                    <property name="text">
-                    <string>Attendees (one per line)</string>
+                    <string>Attendees (Email only)</string>
                    </property>
                   </widget>
                  </item>
@@ -244,51 +244,61 @@
          <item>
           <widget class="QPushButton" name="backToOverviewButton">
            <property name="text">
-            <string>Back to overview</string>
+            <string>Back to project view</string>
            </property>
           </widget>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QTableView" name="eventTable">
-         <property name="editTriggers">
-          <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+        <widget class="QSplitter" name="eventSplitter">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="dragEnabled">
-          <bool>true</bool>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::DragDrop</enum>
-         </property>
-         <property name="defaultDropAction">
-          <enum>Qt::CopyAction</enum>
-         </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::SingleSelection</enum>
-         </property>
-         <property name="sortingEnabled">
-          <bool>true</bool>
-         </property>
+         <widget class="QTableView" name="eventView">
+          <property name="editTriggers">
+           <set>QAbstractItemView::DoubleClicked|QAbstractItemView::SelectedClicked</set>
+          </property>
+          <property name="tabKeyNavigation">
+           <bool>true</bool>
+          </property>
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::DragDrop</enum>
+          </property>
+          <property name="defaultDropAction">
+           <enum>Qt::CopyAction</enum>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectItems</enum>
+          </property>
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="calendarTab">
       <attribute name="title">
-       <string>Calendar</string>
+       <string>Press</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QCheckBox" name="debugModeCheck">
-         <property name="text">
-          <string>Debug mode</string>
-         </property>
-        </widget>
-       </item>
        <item>
         <widget class="QWidget" name="debugWidget" native="true">
          <layout class="QGridLayout" name="gridLayout">
@@ -305,7 +315,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Client secret</string>
+             <string>Client auth</string>
             </property>
            </widget>
           </item>
@@ -396,7 +406,7 @@
             <item>
              <widget class="QPushButton" name="calendarNewButton">
               <property name="text">
-               <string>(Create a calender)</string>
+               <string>Create a calender</string>
               </property>
              </widget>
             </item>
@@ -454,12 +464,19 @@
          <item>
           <widget class="QPushButton" name="publishExistingButton">
            <property name="text">
-            <string>Publish Project in</string>
+            <string>Publish in</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="calCombo"/>
+          <widget class="QComboBox" name="calCombo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
          </item>
          <item>
           <spacer name="horizontalSpacer_11">
@@ -501,19 +518,26 @@
          </item>
         </layout>
        </item>
+       <item>
+        <widget class="QCheckBox" name="debugModeCheck">
+         <property name="text">
+          <string>Debug mode !!!DO NOT enable unless you know what it does!!!</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="pubTab">
+     <widget class="QWidget" name="calmanTab">
       <attribute name="title">
-       <string>Publication</string>
+       <string>Cals</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_8">
+      <layout class="QVBoxLayout" name="verticalLayout_13">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_10">
          <item>
-          <widget class="QPushButton" name="pubDeleteButton">
+          <widget class="QPushButton" name="calmanDeleteButton">
            <property name="text">
-            <string>Delete</string>
+            <string>Delete locally</string>
            </property>
           </widget>
          </item>
@@ -533,12 +557,9 @@
         </layout>
        </item>
        <item>
-        <widget class="QTableView" name="pubTable">
-         <property name="selectionMode">
-          <enum>QAbstractItemView::SingleSelection</enum>
-         </property>
-         <property name="sortingEnabled">
-          <bool>true</bool>
+        <widget class="QTableView" name="calmanView">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
          </property>
         </widget>
        </item>
@@ -662,6 +683,27 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
+        <widget class="QTableWidget" name="tableWidget"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_15">
+         <item>
+          <widget class="QPushButton" name="addRowButton">
+           <property name="text">
+            <string>+row</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="addColButton">
+           <property name="text">
+            <string>+col</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QTextEdit" name="scriptEdit"/>
        </item>
        <item>
@@ -689,24 +731,6 @@
         </layout>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="contactsTab">
-      <attribute name="title">
-       <string>Contacts test</string>
-      </attribute>
-      <widget class="QPushButton" name="contactsListButton">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>97</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Get contacts</string>
-       </property>
-      </widget>
      </widget>
     </widget>
    </item>

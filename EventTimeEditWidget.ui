@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>115</width>
+    <width>117</width>
     <height>134</height>
    </rect>
   </property>
@@ -114,12 +114,12 @@
        <widget class="QComboBox" name="directionCombo">
         <item>
          <property name="text">
-          <string>Forward</string>
+          <string>After</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Backward</string>
+          <string>Before</string>
          </property>
         </item>
        </widget>

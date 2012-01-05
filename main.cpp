@@ -11,7 +11,7 @@
 int main(int argc, char **argv) {
 	QApplication a(argc, argv);
 	a.setOrganizationName("azurvii");
-//	a.setOrganizationDomain("azurvii.net");
+	a.setOrganizationDomain("azurvii.net");
 	a.setApplicationName("Galendar");
 	a.setApplicationVersion("1.0");
 	GalendarForm w;

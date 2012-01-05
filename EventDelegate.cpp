@@ -13,6 +13,7 @@
 #include "EventTimeEditWidget.h"
 #include <QMouseEvent>
 #include "GalendarForm.h"
+#include <QPlainTextEdit>
 
 EventDelegate::EventDelegate(QObject *parent) :
 		QStyledItemDelegate(parent) {
@@ -24,7 +25,11 @@ QWidget *EventDelegate::createEditor(QWidget *parent,
 	int col = index.column();
 //	index.model()->headerData(col, Qt::Horizontal);
 	EventTimeEditWidget *editor;
+	QPlainTextEdit *textEdit;
 	switch (col) {
+	case 2:
+		textEdit = new QPlainTextEdit(parent);
+		return textEdit;
 	case 3:
 	case 4:
 //		int offset = index.data().toInt();
@@ -86,6 +91,11 @@ void EventDelegate::updateEditorGeometry(QWidget *editor,
 //	std::cout << "updateEditorGeometry" << std::endl;
 	int col = index.column();
 	switch (col) {
+	case 2:
+		editor->adjustSize();
+		editor->setGeometry(option.rect.x(), option.rect.y(), editor->width(),
+				editor->height());
+		break;
 	case 3:
 	case 4:
 		editor->adjustSize();
