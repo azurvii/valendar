@@ -1,0 +1,30 @@
+.page-header {
+	padding: 8px;
+	border-bottom: 1px solid grey;
+}
+
+.title {
+	font-size: 2em;
+	font-weight: bold;
+	margin: 0px 0px 10px;
+	color: grey;
+}
+
+.methodsHeaderRow {
+	background-color: #2062B8;
+	color: white;
+}
+
+/* .gwt-flextable { */
+/* 	border-collapse: collapse; */
+/* } */
+
+/* .gwt-flextable td,th { */
+/* 	border: 1px solid black; */
+/* } */
+
+.gwt-FrameHeader {
+	border: 0px;
+	padding: 0.3em;
+}
+

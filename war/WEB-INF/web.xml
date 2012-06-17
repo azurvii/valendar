@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+	<!-- TODO: Add <servlet> tags for each servlet here. -->
+	<servlet>
+		<servlet-name>OAuth2Callback</servlet-name>
+		<servlet-class>com.google.corp.vinl.valendar.server.OAuth2Callback</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ProjectListService</servlet-name>
+		<servlet-class>com.google.corp.vinl.valendar.server.ProjectListServiceImpl</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ProjectEditService</servlet-name>
+		<servlet-class>com.google.corp.vinl.valendar.server.ProjectEditServiceImpl</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ProjectPublishService</servlet-name>
+		<servlet-class>com.google.corp.vinl.valendar.server.ProjectPublishServiceImpl</servlet-class>
+	</servlet>
+	<!-- TODO: Add <servlet-mapping> tags for each <servlet> here. -->
+	<servlet-mapping>
+		<servlet-name>OAuth2Callback</servlet-name>
+		<url-pattern>/oauth2callback/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ProjectListService</servlet-name>
+		<url-pattern>/plistService/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ProjectEditService</servlet-name>
+		<url-pattern>/peditService/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ProjectPublishService</servlet-name>
+		<url-pattern>/ppublishService/*</url-pattern>
+	</servlet-mapping>
+	<!-- TODO: Optionally add a <welcome-file-list> tag to display a welcome 
+		file. -->
+	<welcome-file-list>
+		<welcome-file>plist.jsp</welcome-file>
+	</welcome-file-list>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>any</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>*</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+</web-app>

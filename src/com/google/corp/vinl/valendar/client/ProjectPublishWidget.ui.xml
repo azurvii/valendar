@@ -1,0 +1,148 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		
+	</ui:style>
+	<g:HTMLPanel>
+
+		<g:DockLayoutPanel unit="EM" width="100%" height="100%">
+			<g:west size="0.5">
+				<g:HTMLPanel />
+			</g:west>
+			<g:west size="11.0">
+				<g:VerticalPanel>
+					<g:Cell horizontalAlignment="ALIGN_CENTER">
+						<g:Button ui:field="backButton">Back to project list</g:Button>
+					</g:Cell>
+					<g:DecoratorPanel>
+						<g:VerticalPanel>
+							<g:Cell horizontalAlignment="ALIGN_CENTER">
+								<g:Label text="Publications" />
+							</g:Cell>
+							<g:Cell horizontalAlignment="ALIGN_CENTER">
+								<g:ListBox visibleItemCount="10" ui:field="eventList"
+									width="10em" />
+							</g:Cell>
+							<g:Cell horizontalAlignment="ALIGN_CENTER">
+								<g:HorizontalPanel>
+									<g:Button ui:field="addButton" width="2.5em">+</g:Button>
+									<g:Button ui:field="deleteButton" width="2.5em">-</g:Button>
+									<g:Button ui:field="refreshButton">Refresh</g:Button>
+								</g:HorizontalPanel>
+							</g:Cell>
+							<g:HTML wordWrap="true" height="0.5em" />
+							<g:Cell horizontalAlignment="ALIGN_CENTER">
+								<g:HorizontalPanel>
+									<g:Button ui:field="saveButton">Save</g:Button>
+									<g:Button ui:field="publishButton">Edit proj</g:Button>
+								</g:HorizontalPanel>
+							</g:Cell>
+						</g:VerticalPanel>
+					</g:DecoratorPanel>
+					<g:Label ui:field="messageLabel" />
+				</g:VerticalPanel>
+			</g:west>
+			<g:west size="0.5">
+				<g:HTMLPanel />
+			</g:west>
+			<g:center>
+				<g:VerticalPanel>
+					<!-- <g:DisclosurePanel animationEnabled="true"> -->
+					<!-- <g:header>New event</g:header> -->
+					<!-- <g:VerticalPanel> -->
+					<!-- <g:HorizontalPanel> -->
+					<!-- <g:Cell verticalAlignment="ALIGN_MIDDLE"> -->
+					<!-- <g:TextBox ui:field="newProjectText" /> -->
+					<!-- </g:Cell> -->
+					<!-- <g:Cell verticalAlignment="ALIGN_MIDDLE"> -->
+					<!-- <g:Button ui:field="createButton">Create</g:Button> -->
+					<!-- </g:Cell> -->
+					<!-- </g:HorizontalPanel> -->
+					<!-- <g:HTML> -->
+					<!-- Try refresh the list after creation. -->
+					<!-- <br /> -->
+					<!-- Datastore needs some time to process your request. -->
+					<!-- </g:HTML> -->
+					<!-- </g:VerticalPanel> -->
+					<!-- </g:DisclosurePanel> -->
+					<g:DecoratorPanel>
+						<g:Grid>
+							<g:row>
+								<g:customCell>
+									<g:Label text="Name" />
+								</g:customCell>
+								<g:customCell>
+									<g:TextBox width="20em" ui:field="nameText" />
+								</g:customCell>
+							</g:row>
+							<g:row>
+								<g:customCell>
+									<g:Label text="Description" />
+								</g:customCell>
+								<g:customCell>
+									<g:TextArea width="20em" height="10em" ui:field="descriptionText" />
+								</g:customCell>
+							</g:row>
+							<g:row>
+								<g:customCell>
+									<g:Label text="Offset" />
+								</g:customCell>
+								<g:customCell>
+									<g:HorizontalPanel width="20em">
+										<g:IntegerBox visibleLength="10" width="16em"
+											ui:field="offsetIntegerBox" name="asdf" />
+										<g:Cell verticalAlignment="ALIGN_MIDDLE">
+											<g:Label text="day(s)" />
+										</g:Cell>
+									</g:HorizontalPanel>
+								</g:customCell>
+							</g:row>
+							<g:row>
+								<g:customCell>
+									<g:Label text="Duration" />
+								</g:customCell>
+								<g:customCell>
+									<g:HorizontalPanel width="20em">
+										<g:IntegerBox visibleLength="10" width="16em"
+											ui:field="durationIntegerBox" />
+										<g:Cell verticalAlignment="ALIGN_MIDDLE">
+											<g:Label text="day(s)" />
+										</g:Cell>
+									</g:HorizontalPanel>
+								</g:customCell>
+							</g:row>
+						</g:Grid>
+					</g:DecoratorPanel>
+					<g:DisclosurePanel animationEnabled="true">
+						<g:header>Project info</g:header>
+						<g:VerticalPanel>
+							<g:Cell>
+								<g:HorizontalPanel>
+									<g:Cell verticalAlignment="ALIGN_MIDDLE">
+										<g:Label text="Name:" width="4em" />
+									</g:Cell>
+									<g:Cell>
+										<g:Label ui:field="projectNameText" width="16em" />
+									</g:Cell>
+								</g:HorizontalPanel>
+							</g:Cell>
+							<g:Label text="Description:" />
+							<g:Label ui:field="projectDescriptionText" width="20em"
+								height="8em" />
+							<g:HorizontalPanel>
+								<g:Label text="Created on: " />
+								<g:HTML wordWrap="true">&nbsp; </g:HTML>
+								<g:Label ui:field="creationDateLabel" />
+							</g:HorizontalPanel>
+							<!-- <g:HorizontalPanel> -->
+							<!-- <g:Label text="Events: " /> -->
+							<!-- <g:HTML wordWrap="true">&nbsp; </g:HTML> -->
+							<!-- </g:HorizontalPanel> -->
+						</g:VerticalPanel>
+					</g:DisclosurePanel>
+				</g:VerticalPanel>
+			</g:center>
+		</g:DockLayoutPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 
