@@ -1,6 +1,7 @@
 package com.google.corp.vinl.valendar.client;
 
 import com.google.corp.vinl.valendar.shared.AuthenticationException;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 
 public class Utils {
@@ -16,6 +17,10 @@ public class Utils {
 
 	static public String strOfObj(String str) {
 		return str == null ? "" : str;
+	}
+
+	static public DateTimeFormat getDateFormat() {
+		return DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
 	}
 
 	private Utils() {

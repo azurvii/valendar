@@ -13,7 +13,6 @@ import com.google.corp.vinl.valendar.client.rpc.ProjectListServiceAsync;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -22,15 +21,15 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 public class ProjectEditEntry implements EntryPoint, EntryThatCanCreate {
 
+	enum LeaveDirection {
+		LD_NOWHERE, LD_PLIST, LD_PPUBLISH
+	};
+
 	static final Long MSECS_PER_DAY = 1000L * 60 * 60 * 24;
 	static private final ProjectEditServiceAsync PEDIT_SERVICE = GWT
 			.create(ProjectEditService.class);
 	static private final ProjectListServiceAsync PLIST_SERVICE = GWT
 			.create(ProjectListService.class);
-
-	enum LeaveDirection {
-		LD_NOWHERE, LD_PLIST, LD_PPUBLISH
-	};
 
 	private LeaveDirection leaveDirection;
 	private ProjectEditWidget mainWidget;
@@ -222,9 +221,8 @@ public class ProjectEditEntry implements EntryPoint, EntryThatCanCreate {
 					.getTitle()));
 			mainWidget.projectDescriptionText.setText(Utils.strOfObj(project
 					.getDescription()));
-			mainWidget.creationDateLabel.setText(Utils.strOfObj(DateTimeFormat
-					.getFormat("yyyy-MM-dd HH:mm:ss").format(
-							project.getCreationDate())));
+			mainWidget.creationDateLabel.setText(Utils.getDateFormat().format(
+					project.getCreationDate()));
 			mainWidget.refreshButton.click();
 		}
 	}

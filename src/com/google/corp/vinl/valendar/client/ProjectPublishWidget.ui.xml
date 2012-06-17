@@ -5,7 +5,6 @@
 		
 	</ui:style>
 	<g:HTMLPanel>
-
 		<g:DockLayoutPanel unit="EM" width="100%" height="100%">
 			<g:west size="0.5">
 				<g:HTMLPanel />
@@ -21,21 +20,19 @@
 								<g:Label text="Publications" />
 							</g:Cell>
 							<g:Cell horizontalAlignment="ALIGN_CENTER">
-								<g:ListBox visibleItemCount="10" ui:field="eventList"
+								<g:ListBox visibleItemCount="10" ui:field="publicationList"
 									width="10em" />
 							</g:Cell>
 							<g:Cell horizontalAlignment="ALIGN_CENTER">
 								<g:HorizontalPanel>
 									<g:Button ui:field="addButton" width="2.5em">+</g:Button>
-									<g:Button ui:field="deleteButton" width="2.5em">-</g:Button>
 									<g:Button ui:field="refreshButton">Refresh</g:Button>
 								</g:HorizontalPanel>
 							</g:Cell>
 							<g:HTML wordWrap="true" height="0.5em" />
 							<g:Cell horizontalAlignment="ALIGN_CENTER">
 								<g:HorizontalPanel>
-									<g:Button ui:field="saveButton">Save</g:Button>
-									<g:Button ui:field="publishButton">Edit proj</g:Button>
+									<g:Button ui:field="editButton">Edit project</g:Button>
 								</g:HorizontalPanel>
 							</g:Cell>
 						</g:VerticalPanel>
@@ -66,54 +63,64 @@
 					<!-- </g:HTML> -->
 					<!-- </g:VerticalPanel> -->
 					<!-- </g:DisclosurePanel> -->
-					<g:DecoratorPanel>
-						<g:Grid>
-							<g:row>
-								<g:customCell>
-									<g:Label text="Name" />
-								</g:customCell>
-								<g:customCell>
-									<g:TextBox width="20em" ui:field="nameText" />
-								</g:customCell>
-							</g:row>
-							<g:row>
-								<g:customCell>
-									<g:Label text="Description" />
-								</g:customCell>
-								<g:customCell>
-									<g:TextArea width="20em" height="10em" ui:field="descriptionText" />
-								</g:customCell>
-							</g:row>
-							<g:row>
-								<g:customCell>
-									<g:Label text="Offset" />
-								</g:customCell>
-								<g:customCell>
-									<g:HorizontalPanel width="20em">
-										<g:IntegerBox visibleLength="10" width="16em"
-											ui:field="offsetIntegerBox" name="asdf" />
-										<g:Cell verticalAlignment="ALIGN_MIDDLE">
-											<g:Label text="day(s)" />
-										</g:Cell>
-									</g:HorizontalPanel>
-								</g:customCell>
-							</g:row>
-							<g:row>
-								<g:customCell>
-									<g:Label text="Duration" />
-								</g:customCell>
-								<g:customCell>
-									<g:HorizontalPanel width="20em">
-										<g:IntegerBox visibleLength="10" width="16em"
-											ui:field="durationIntegerBox" />
-										<g:Cell verticalAlignment="ALIGN_MIDDLE">
-											<g:Label text="day(s)" />
-										</g:Cell>
-									</g:HorizontalPanel>
-								</g:customCell>
-							</g:row>
-						</g:Grid>
-					</g:DecoratorPanel>
+					<g:DecoratedStackPanel>
+						<g:DecoratorPanel width="100%" height="100%"
+							g:StackPanel-text="New publication">
+							<g:Grid>
+								<g:row>
+									<g:customCell>
+										<g:Label text="Calendar name" />
+									</g:customCell>
+									<g:customCell>
+										<g:TextBox width="20em" />
+									</g:customCell>
+								</g:row>
+								<g:row>
+									<g:customCell>
+										<g:Label text="Attendees" />
+									</g:customCell>
+									<g:customCell>
+										<g:TextArea width="20em" height="10em" ui:field="attendeesText" />
+									</g:customCell>
+								</g:row>
+								<g:row>
+									<g:customCell>
+										<g:Button ui:field="publishButton">Publish</g:Button>
+									</g:customCell>
+								</g:row>
+							</g:Grid>
+						</g:DecoratorPanel>
+						<g:DecoratorPanel width="100%" height="100%"
+							g:StackPanel-text="Publication information">
+							<g:Grid>
+								<g:row>
+									<g:customCell>
+										<g:Label text="Time" />
+									</g:customCell>
+									<g:customCell>
+										<g:Label width="20em" ui:field="publicationTimeLabel" />
+									</g:customCell>
+								</g:row>
+								<g:row>
+									<g:customCell>
+										<g:Label text="Calendar" />
+									</g:customCell>
+									<g:customCell>
+										<g:Label ui:field="calendarNameLabel" />
+									</g:customCell>
+								</g:row>
+								<g:row>
+									<g:customCell>
+										<g:Label text="Attendees" />
+									</g:customCell>
+									<g:customCell>
+										<g:ListBox ui:field="attendeesLabel" width="20em"
+											visibleItemCount="10" />
+									</g:customCell>
+								</g:row>
+							</g:Grid>
+						</g:DecoratorPanel>
+					</g:DecoratedStackPanel>
 					<g:DisclosurePanel animationEnabled="true">
 						<g:header>Project info</g:header>
 						<g:VerticalPanel>
@@ -123,17 +130,22 @@
 										<g:Label text="Name:" width="4em" />
 									</g:Cell>
 									<g:Cell>
-										<g:Label ui:field="projectNameText" width="16em" />
+										<g:Label ui:field="projectNameLabel" width="16em" />
 									</g:Cell>
 								</g:HorizontalPanel>
 							</g:Cell>
 							<g:Label text="Description:" />
-							<g:Label ui:field="projectDescriptionText" width="20em"
+							<g:Label ui:field="projectDescriptionLabel" width="20em"
 								height="8em" />
 							<g:HorizontalPanel>
 								<g:Label text="Created on: " />
 								<g:HTML wordWrap="true">&nbsp; </g:HTML>
-								<g:Label ui:field="creationDateLabel" />
+								<g:Label ui:field="projectCreationDateLabel" />
+							</g:HorizontalPanel>
+							<g:HorizontalPanel>
+								<g:Label text="Events: " />
+								<g:HTML wordWrap="true">&nbsp;</g:HTML>
+								<g:Label ui:field="projectEventCountLabel" />
 							</g:HorizontalPanel>
 							<!-- <g:HorizontalPanel> -->
 							<!-- <g:Label text="Events: " /> -->
