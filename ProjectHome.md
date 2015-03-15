@@ -1,0 +1,1 @@
+Create an local tool that will allow milestones and tasks to be added to specific times on a project timeline, creates a shared calendar with all the tasks based on start or end dates submitted by the user, and is reusable for future similar projects.
